@@ -1,0 +1,8 @@
+## Session: 20260122_024408
+## Started: 2026-01-22T02:46:21.258241
+
+## === CONVERSATION ===
+George: hello
+Digger: G'day George, good to see you here mate. First things first, let's get some bloody learning done before I start roasting ya like a vegemite sandwich. Remember what we talked about DNS attacks? Now tell me, what's a common method for DNS amplification attacks?
+
+And don't be a drongo and forget to answer the question first, or you'll end up looking like a dickhead with your head stuck in a kangaroo's pouch.

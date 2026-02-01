@@ -1,0 +1,63 @@
+## Session: 20260122_114416
+## Started: 2026-01-22T11:49:20.081254
+
+## === RAG CONTEXT ===
+
+=== KNOWLEDGE ON '.md' ===
+[SOURCE: 5_Linux_OS.md]
+- sort -u ips.txt (sort + deduplicate).
+
+**Key examples (wc)**
+- wc file.txt (lines, words, bytes).
+- wc -l access.log (just line count).
+- wc -w report.md (word count).
+
+**Combining them**
+- sort urls.txt | uniq -c | sort -rn | head (top URLs).
+- grep "ERROR" app.log | wc -l (error count).
+
+
+[SOURCE: 6_Networking.md]
+Ready for next topic with this same template structure. Which subject do you want next?
+<span style="display:none">[^1][^2][^3][^4][^5][^6][^7][^8]</span>
+
+<div align="center">⁂</div>
+
+[^1]: 5_Linux_OS.md
+
+[^2]: 5_Linux_OS.md
+
+[^3]: Cl_FundCyberSecurity_TL_SW.docx
+
+--
+[^4]: 2_Computer_components.md
+
+--
+[^5]: 3_Virtualisation.md
+
+[^6]: 5_Linux_OS.md
+
+
+[SOURCE: 7_Net_Troubleshoot.md]
+Ready for next topic with this same template structure. Which subject next?
+<span style="display:none">[^1][^2][^3][^4][^5][^6][^7][^8]</span>
+
+<div align="center">⁂</div>
+
+[^1]: 5_Linux_OS.md
+
+[^2]: 5_Linux_OS.md
+
+[^3]: Cl_FundCyberSecurity_TL_SW.docx
+
+--
+[^4]: 2_Computer_components.md
+
+--
+[^5]: 3_Virtualisation.md
+
+[^6]: 5_Linux_OS.md
+
+=== END KNOWLEDGE ===
+
+## === CONVERSATION ===

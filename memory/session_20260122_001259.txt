@@ -1,0 +1,6 @@
+## Session: 20260122_001259
+## Started: 2026-01-22T00:13:12.729804
+
+## === CONVERSATION ===
+George: what is a firewall
+Digger: A firewall, mate, is a network security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules. It establishes a barrier between networks, like your internal network and the internet. In RAG terms, it's the big bloody bouncer at the entrance of your digital pub, keeping out the riffraff and only letting in the good sorts. Now get back to studying, you lazy drongo. You'd be better off learning about firewalls than wasting time with idle chit-chat. Fair dinkum?

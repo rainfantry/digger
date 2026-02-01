@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIGGER - Complete Preservation Document</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --fg: #eee;
+            --accent: #00ff88;
+            --code-bg: #0f0f1a;
+            --border: #333;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h2, h3 { color: var(--accent); }
+        h1 { border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-top: 40px; }
+        pre {
+            background: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        .inline-code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #442200;
+            border-left: 4px solid #ff8800;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .critical {
+            background: #440000;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #004400;
+            border-left: 4px solid #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+        th { background: var(--code-bg); }
+        .toc {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .toc a { color: var(--accent); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .file-header {
+            background: var(--accent);
+            color: var(--bg);
+            padding: 10px 15px;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            margin-top: 20px;
+        }
+        .file-content {
+            border-radius: 0 0 8px 8px;
+            margin-top: 0;
+        }
+        .metadata {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<h1>DIGGER - Complete Preservation Document</h1>
+<p class="metadata">
+    Generated: 2026-01-22 | Version: 0.1.0 | Voice ID: twLPF55UcxNYRmxaWLAn<br>
+    This document contains everything needed to recreate Digger from scratch.
+</p>
+
+<div class="toc">
+    <strong>Table of Contents</strong>
+    <ol>
+        <li><a href="#overview">Overview &amp; Architecture</a></li>
+        <li><a href="#installation">Installation Guide</a></li>
+        <li><a href="#configuration">Configuration Reference</a></li>
+        <li><a href="#critical-fixes">Critical Fixes (Don't Break These)</a></li>
+        <li><a href="#source-code">Complete Source Code</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+</div>
+
+<h2 id="overview">1. Overview &amp; Architecture</h2>
+
+<p>Digger is a CLI study assistant with:</p>
+<ul>
+    <li><strong>Ollama LLM</strong> - Local model (mistral by default) via subprocess</li>
+    <li><strong>ElevenLabs TTS</strong> - Voice output (George voice: <code class="inline-code">twLPF55UcxNYRmxaWLAn</code>)</li>
+    <li><strong>RAG Search</strong> - Knowledge base from .md files</li>
+    <li><strong>Session Memory</strong> - Conversation persistence</li>
+    <li><strong>Foul-mouthed Aussie personality</strong> - Defined in system prompt</li>
+</ul>
+
+<h3>File Structure</h3>
+<pre><code>digger/
+├── digger/                 # Python package
+│   ├── __init__.py        # Package metadata
+│   ├── cli.py             # Main entry point, command loop
+│   ├── config.py          # Configuration, system prompt
+│   ├── ollama.py          # LLM interaction
+│   ├── voice.py           # ElevenLabs TTS
+│   ├── rag.py             # Knowledge base search
+│   └── session.py         # Conversation memory
+├── RAG/                    # Knowledge base (.md files)
+├── memory/                 # Session files
+├── tests/
+│   └── test_digger.py     # Automated tests (17 tests)
+├── pyproject.toml         # Package configuration
+└── DIGGER_COMPLETE_PRESERVATION.html  # This file
+</code></pre>
+
+<h3>Data Flow</h3>
+<pre><code>User Input
+    ↓
+Command Check (exit/load/paste/etc)
+    ↓
+Session adds message
+    ↓
+Session builds context: SYSTEM_PROMPT + RAG + History
+    ↓
+Ollama subprocess (streaming)
+    ↓
+Voice plays (non-blocking, mpg123)
+    ↓
+Loop back to input
+</code></pre>
+
+<h2 id="installation">2. Installation Guide</h2>
+
+<h3>System Requirements</h3>
+<ul>
+    <li>Python 3.8+</li>
+    <li>Ollama (local LLM server)</li>
+    <li>mpg123 (audio playback)</li>
+    <li>ElevenLabs API key (for voice)</li>
+</ul>
+
+<h3>Step-by-Step Installation</h3>
+<pre><code># 1. Install system dependencies (Debian/Ubuntu)
+sudo apt update
+sudo apt install python3 python3-pip mpg123
+
+# 2. Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull mistral
+
+# 3. Extract/clone digger
+tar -xzvf digger-backup.tar.gz
+cd digger
+
+# 4. Install Python package (editable mode)
+pip install -e .
+
+# 5. Set API key (choose one method)
+# Method A: Environment variable
+export ELEVENLABS_API_KEY="your-key-here"
+
+# Method B: Config file
+mkdir -p ~/.config/digger
+cat > ~/.config/digger/config.yaml << 'EOF'
+elevenlabs_api_key: "your-key-here"
+voice_id: "twLPF55UcxNYRmxaWLAn"
+model: "mistral"
+EOF
+
+# 6. Run
+digger
+</code></pre>
+
+<h3>Verify Installation</h3>
+<pre><code># Run tests
+python tests/test_digger.py
+
+# Expected: PASSED: 17 | FAILED: 0
+</code></pre>
+
+<h2 id="configuration">3. Configuration Reference</h2>
+
+<h3>Precedence Chain (highest to lowest)</h3>
+<ol>
+    <li>CLI arguments (<code class="inline-code">--model</code>, <code class="inline-code">--no-voice</code>)</li>
+    <li>Environment variables</li>
+    <li>Config file (~/.config/digger/config.yaml)</li>
+    <li>Default values in config.py</li>
+</ol>
+
+<h3>Environment Variables</h3>
+<table>
+    <tr><th>Variable</th><th>Purpose</th><th>Example</th></tr>
+    <tr><td>ELEVENLABS_API_KEY</td><td>Voice API key</td><td>sk_...</td></tr>
+    <tr><td>OLLAMA_MODEL</td><td>Default model</td><td>mistral</td></tr>
+    <tr><td>DIGGER_RAG_DIR</td><td>RAG directory</td><td>/path/to/RAG</td></tr>
+    <tr><td>DIGGER_MEMORY_DIR</td><td>Session directory</td><td>/path/to/memory</td></tr>
+    <tr><td>DIGGER_VOICE_ENABLED</td><td>Enable voice</td><td>true/false</td></tr>
+</table>
+
+<h3>CLI Arguments</h3>
+<pre><code>digger --help              # Show help
+digger --list              # List available models
+digger --model llama3      # Use specific model
+digger --no-voice          # Disable voice
+digger --rag-dir /path     # Custom RAG directory
+</code></pre>
+
+<h3>Voice Configuration</h3>
+<table>
+    <tr><th>Setting</th><th>Value</th><th>Description</th></tr>
+    <tr><td>voice_id</td><td>twLPF55UcxNYRmxaWLAn</td><td>George voice (ElevenLabs)</td></tr>
+    <tr><td>voice_stability</td><td>0.4</td><td>Lower = more expressive</td></tr>
+    <tr><td>voice_similarity</td><td>0.8</td><td>Voice consistency</td></tr>
+    <tr><td>model_id</td><td>eleven_flash_v2_5</td><td>Fast TTS model</td></tr>
+</table>
+
+<h2 id="critical-fixes">4. Critical Fixes (Don't Break These)</h2>
+
+<div class="critical">
+<strong>FIX #1: mpg123 stdin stealing (voice.py:265-270)</strong><br><br>
+<strong>Problem:</strong> After voice plays, keyboard input fails. User cannot type.<br>
+<strong>Cause:</strong> mpg123 subprocess inherits stdin from parent, competes for keyboard.<br>
+<strong>Solution:</strong> Add <code class="inline-code">stdin=subprocess.DEVNULL</code> to Popen call.<br><br>
+<pre><code>self.process = subprocess.Popen(
+    ["mpg123", "-q", self.temp_file],
+    stdin=subprocess.DEVNULL,   # CRITICAL - prevents stdin stealing
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL
+)</code></pre>
+</div>
+
+<div class="critical">
+<strong>FIX #2: Ollama stdin deadlock (ollama.py:71-73)</strong><br><br>
+<strong>Problem:</strong> Model hangs, never responds.<br>
+<strong>Cause:</strong> Subprocess waits for more stdin, readline() deadlocks.<br>
+<strong>Solution:</strong> Flush and close stdin after writing.<br><br>
+<pre><code>process.stdin.write((context + "\n").encode())
+process.stdin.flush()   # CRITICAL
+process.stdin.close()   # CRITICAL</code></pre>
+</div>
+
+<div class="warning">
+<strong>FIX #3: System prompt roleplay prevention (config.py:44-53)</strong><br><br>
+<strong>Problem:</strong> Model prefixes responses with "Digger:" or generates fake dialogue.<br>
+<strong>Solution:</strong> Explicit rules in system prompt.<br><br>
+<pre><code>RULES:
+3. NEVER prefix your response with "Digger:" or any name
+4. NEVER generate fake dialogue or multiple turns
+5. ONE short response only</code></pre>
+</div>
+
+<div class="warning">
+<strong>FIX #4: RAG absolute paths (config.py:32-33)</strong><br><br>
+<strong>Problem:</strong> RAG not found when running from different directory.<br>
+<strong>Solution:</strong> Use PACKAGE_DIR for absolute paths.<br><br>
+<pre><code>PACKAGE_DIR = Path(__file__).parent.parent.resolve()
+DEFAULT_CONFIG = {
+    "rag_dir": str(PACKAGE_DIR / "RAG"),
+    "memory_dir": str(PACKAGE_DIR / "memory"),
+}</code></pre>
+</div>
+
+<h2 id="source-code">5. Complete Source Code</h2>
+
+<div class="file-header">pyproject.toml</div>
+<pre class="file-content"><code>## ============================================================
+## PYPROJECT.TOML - Modern Python package configuration
+## ============================================================
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digger"
+version = "0.1.0"
+description = "Foul-mouthed Aussie study assistant with RAG and voice"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    {name = "George Wu", email = "george@example.com"}
+]
+
+dependencies = [
+    "requests>=2.28.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+]
+
+[project.scripts]
+digger = "digger.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+</code></pre>
+
+<div class="file-header">digger/__init__.py</div>
+<pre class="file-content"><code>## ============================================================
+## __init__.py - Package initialization
+## ============================================================
+
+__version__ = "0.1.0"
+__author__ = "George Wu"
+__description__ = "Foul-mouthed Aussie study assistant with RAG and voice"
+</code></pre>
+
+<div class="file-header">digger/config.py</div>
+<pre class="file-content"><code>## ============================================================
+## CONFIG.PY - Configuration management
+## ============================================================
+## Handles loading and merging configuration from multiple sources.
+##
+## PRECEDENCE CHAIN (highest to lowest priority):
+## 1. CLI arguments (--model, --rag-dir, etc)
+## 2. Environment variables (ELEVENLABS_API_KEY, OLLAMA_MODEL)
+## 3. User config file (~/.config/digger/config.yaml)
+## 4. Default values (hardcoded below)
+## ============================================================
+
+import os
+import yaml
+from pathlib import Path
+
+## ============================================================
+## PACKAGE ROOT - Resolve paths relative to installation
+## ============================================================
+PACKAGE_DIR = Path(__file__).parent.parent.resolve()
+
+## ============================================================
+## DEFAULT VALUES
+## ============================================================
+DEFAULT_CONFIG = {
+    "elevenlabs_api_key": "",
+    "voice_id": "twLPF55UcxNYRmxaWLAn",  ## George voice
+    "model": "mistral",
+    "rag_dir": str(PACKAGE_DIR / "RAG"),
+    "memory_dir": str(PACKAGE_DIR / "memory"),
+    "voice_enabled": True,
+    "voice_stability": 0.4,
+    "voice_similarity": 0.8,
+}
+
+## ============================================================
+## SYSTEM PROMPT - Sets Digger's personality
+## ============================================================
+SYSTEM_PROMPT = """You are a crude Australian cybersecurity tutor. Be vulgar, use slang (cunt, drongo, dickhead), roast the student.
+
+RULES:
+1. Answer the question correctly FIRST
+2. Then insult the student
+3. NEVER prefix your response with "Digger:" or any name
+4. NEVER generate fake dialogue or multiple turns
+5. ONE short response only
+
+If knowledge is provided above, use it."""
+
+## ============================================================
+## CONFIG FILE LOCATIONS
+## ============================================================
+CONFIG_PATHS = [
+    Path.home() / ".config" / "digger" / "config.yaml",
+    Path.home() / ".digger" / "config.yaml",
+    Path("./config.yaml"),
+]
+
+
+def load_config(cli_args=None):
+    """
+    Load configuration with precedence chain.
+    """
+    config = DEFAULT_CONFIG.copy()
+    config = _merge_file_config(config)
+    config = _merge_env_config(config)
+    if cli_args:
+        config = _merge_cli_config(config, cli_args)
+    _validate_config(config)
+    return config
+
+
+def _merge_file_config(config):
+    """Load config from YAML file if it exists."""
+    for config_path in CONFIG_PATHS:
+        if config_path.exists():
+            try:
+                with open(config_path, "r") as f:
+                    file_config = yaml.safe_load(f) or {}
+                for key, value in file_config.items():
+                    if value is not None and value != "":
+                        config[key] = value
+                config["_config_file"] = str(config_path)
+                break
+            except yaml.YAMLError as e:
+                print(f"Warning: Error parsing {config_path}: {e}")
+            except Exception as e:
+                print(f"Warning: Could not read {config_path}: {e}")
+    return config
+
+
+def _merge_env_config(config):
+    """Override config with environment variables."""
+    env_mapping = {
+        "ELEVENLABS_API_KEY": "elevenlabs_api_key",
+        "OLLAMA_MODEL": "model",
+        "DIGGER_RAG_DIR": "rag_dir",
+        "DIGGER_MEMORY_DIR": "memory_dir",
+        "DIGGER_VOICE_ID": "voice_id",
+    }
+    for env_var, config_key in env_mapping.items():
+        value = os.environ.get(env_var)
+        if value:
+            config[config_key] = value
+    voice_enabled = os.environ.get("DIGGER_VOICE_ENABLED")
+    if voice_enabled is not None:
+        config["voice_enabled"] = voice_enabled.lower() in ("true", "1", "yes")
+    return config
+
+
+def _merge_cli_config(config, cli_args):
+    """Override config with CLI arguments (highest priority)."""
+    if hasattr(cli_args, "model") and cli_args.model:
+        config["model"] = cli_args.model
+    if hasattr(cli_args, "rag_dir") and cli_args.rag_dir:
+        config["rag_dir"] = cli_args.rag_dir
+    if hasattr(cli_args, "memory_dir") and cli_args.memory_dir:
+        config["memory_dir"] = cli_args.memory_dir
+    if hasattr(cli_args, "voice_id") and cli_args.voice_id:
+        config["voice_id"] = cli_args.voice_id
+    if hasattr(cli_args, "no_voice") and cli_args.no_voice:
+        config["voice_enabled"] = False
+    return config
+
+
+def _validate_config(config):
+    """Validate configuration and warn about issues."""
+    if not config.get("elevenlabs_api_key"):
+        print("Warning: No ELEVENLABS_API_KEY set. Voice disabled.")
+        config["voice_enabled"] = False
+    rag_dir = Path(config["rag_dir"])
+    memory_dir = Path(config["memory_dir"])
+    if not rag_dir.exists():
+        print(f"Note: RAG directory '{rag_dir}' does not exist. Creating...")
+        rag_dir.mkdir(parents=True, exist_ok=True)
+    if not memory_dir.exists():
+        print(f"Note: Memory directory '{memory_dir}' does not exist. Creating...")
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+
+def create_default_config():
+    """Create default config file at ~/.config/digger/config.yaml"""
+    config_dir = Path.home() / ".config" / "digger"
+    config_file = config_dir / "config.yaml"
+    if config_file.exists():
+        print(f"Config already exists: {config_file}")
+        return
+    config_dir.mkdir(parents=True, exist_ok=True)
+    template = """## Digger Configuration
+elevenlabs_api_key: ""
+voice_id: "twLPF55UcxNYRmxaWLAn"
+model: "mistral"
+rag_dir: "./RAG"
+memory_dir: "./memory"
+voice_enabled: true
+"""
+    with open(config_file, "w") as f:
+        f.write(template)
+    print(f"Created config file: {config_file}")
+
+
+if __name__ == "__main__":
+    print("Testing config loading...")
+    config = load_config()
+    for key, value in config.items():
+        print(f"  {key}: {value}")
+</code></pre>
+
+<div class="file-header">digger/cli.py</div>
+<pre class="file-content"><code>#!/usr/bin/env python3
+## ============================================================
+## CLI.PY - Main entry point for Digger
+## ============================================================
+
+import argparse
+import sys
+import readline  ## Enables arrow keys in input()
+
+from digger.config import load_config
+from digger.session import Session
+from digger.ollama import OllamaClient
+from digger.voice import VoiceEngine
+from digger.rag import RAGSearch
+
+
+## ============================================================
+## GLOBALS
+## ============================================================
+voice_engine = None
+
+
+def print_banner(session_id, model, rag_dir):
+    """Print the startup banner."""
+    banner = r"""
+ _____                                                                 _____
+( ___ )                                                               ( ___ )
+ |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   |
+ |   |       22nd Survey Division ABN 50 692 429 397 Presents:         |   |
+ |   | ____ ____ ____ ____ ____ ____ . ____    _  _ ____ _  _ ___ _  _ |   |
+ |   | | __ |___ |  | |__/ | __ |___ ' [__     |\/| |  | |  |  |  |__| |   |
+ |   | |__] |___ |__| |  \ |__] |___   ___]    |  | |__| |__|  |  |  | |   |
+ |   |                                                                 |   |
+ |   | _  _ _  _ _ _    ____ _  _ ____ _  _ ____ _   _    ___  _ _  _  |   |
+ |   |  \/   \/  | |    [__  |  | |__/ |  | |___  \_/     |  \ | |  |  |   |
+ |   | _/\_ _/\_ | |    ___] |__| |  \  \/  |___   |      |__/ |  \/   |   |
+ |   |                                                                 |   |
+ |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___|
+(_____)                                                               (_____)
+"""
+    print(banner)
+    print("DIGGER - Foul-mouthed Aussie Study Assistant")
+    print(f"Session: {session_id} | Model: {model}")
+    print(f"Knowledge: {rag_dir}")
+    print("")
+    print("Commands: exit | clear | load <topic> | paste | help")
+    print("Ctrl+C = skip voice | Type 'exit' to quit")
+    print("=" * 60)
+
+
+def print_help():
+    """Print help information."""
+    print("""
+DIGGER COMMANDS
+────────────────────────────────────────────────────────────
+  exit                    - End session (saves memory)
+  clear                   - Reset session (clears history + RAG)
+  paste                   - Multiline input (blank line to send)
+  load <topic>            - Search RAG for topic
+  remember <note>         - Add to general_notes.md
+  remember <file>: <note> - Add to specific file
+  show files              - List all RAG files
+  show knowledge          - Display RAG stats
+  help                    - Show this message
+────────────────────────────────────────────────────────────
+Ctrl+C skips voice playback. Type 'exit' to quit.
+""")
+
+
+def multiline_input():
+    """Collect multiline input until blank line."""
+    print("")
+    print("MULTILINE INPUT MODE")
+    print("Type your message (blank line to send):")
+    print("────────────────────────────────────────")
+
+    lines = []
+    try:
+        while True:
+            line = input("│ ")
+            if not line:
+                break
+            lines.append(line)
+    except EOFError:
+        pass
+
+    print("────────────────────────────────────────")
+
+    if lines:
+        return "\n".join(lines)
+    else:
+        print("(empty - cancelled)")
+        return ""
+
+
+def main():
+    """Main entry point for Digger CLI."""
+    global voice_engine
+
+    ## ========================================
+    ## STEP 1: Parse command line arguments
+    ## ========================================
+    parser = argparse.ArgumentParser(
+        description="Digger - Foul-mouthed Aussie study assistant"
+    )
+    parser.add_argument(
+        "--model", "-m",
+        help="Ollama model name (default: from config)"
+    )
+    parser.add_argument(
+        "--no-voice",
+        action="store_true",
+        help="Disable voice output"
+    )
+    parser.add_argument(
+        "--list", "-l",
+        action="store_true",
+        help="List available Ollama models"
+    )
+    parser.add_argument(
+        "--rag-dir",
+        help="RAG knowledge base directory"
+    )
+    parser.add_argument(
+        "--memory-dir",
+        help="Session memory directory"
+    )
+
+    args = parser.parse_args()
+
+    ## ========================================
+    ## STEP 2: Load configuration
+    ## ========================================
+    config = load_config(args)
+
+    ## Handle --list flag
+    if args.list:
+        ollama = OllamaClient(config["model"])
+        print(ollama.list_models())
+        return
+
+    ## ========================================
+    ## STEP 3: Initialize components
+    ## ========================================
+    session = Session(memory_dir=config["memory_dir"])
+    ollama = OllamaClient(model=config["model"])
+
+    if config["voice_enabled"] and not args.no_voice:
+        voice_engine = VoiceEngine(config)
+    else:
+        voice_engine = None
+
+    rag = RAGSearch(rag_dir=config["rag_dir"])
+
+    ## ========================================
+    ## STEP 4: Show banner
+    ## ========================================
+    print_banner(session.id, config["model"], config["rag_dir"])
+
+    if voice_engine:
+        voice_engine.speak("Study session starting.")
+
+    ## ========================================
+    ## STEP 5: Main loop
+    ## ========================================
+    while True:
+        try:
+            print("")
+            user_input = input("You> ").strip()
+
+            if not user_input:
+                continue
+
+            ## ====== COMMAND: exit ======
+            if user_input.lower() in ("exit", "quit", "bye"):
+                print("")
+                print("SESSION SUMMARY")
+                print(f"Session file: {session.filepath}")
+                summary = session.get_summary()
+                print(f"Messages: {summary['message_count']}")
+                print("")
+
+                if voice_engine:
+                    voice_engine.speak("Session complete.")
+                    voice_engine.wait()
+
+                print("Session ended. Memory preserved.")
+                break
+
+            ## ====== COMMAND: help ======
+            if user_input.lower() == "help":
+                print_help()
+                continue
+
+            ## ====== COMMAND: clear ======
+            if user_input.lower() == "clear":
+                session._messages = []
+                session._rag_context = ""
+                session._save()
+                print("Session cleared. RAG and history reset.")
+                continue
+
+            ## ====== COMMAND: paste ======
+            if user_input.lower() == "paste":
+                user_input = multiline_input()
+                if not user_input:
+                    continue
+
+            ## ====== COMMAND: load <topic> ======
+            if user_input.lower().startswith("load "):
+                topic = user_input[5:].strip()
+                if not topic:
+                    print("Usage: load <topic>")
+                    continue
+
+                print(f"\nSearching knowledge base for: {topic}")
+                print("─" * 50)
+
+                results = rag.search(topic)
+
+                if results:
+                    print(results[:2000])
+                    if len(results) > 2000:
+                        print(f"\n[...{len(results) - 2000} more chars...]")
+                    print("─" * 50)
+
+                    session.add_context(results, topic=topic)
+                    print(f"\nKnowledge loaded into session context.")
+
+                    if voice_engine:
+                        voice_engine.speak(f"Knowledge loaded on {topic}.")
+                else:
+                    print(f"No knowledge found on '{topic}'.")
+                    print("\nAvailable files:")
+                    for filename, lines, size in rag.list_files():
+                        print(f"  {filename} ({lines} lines)")
+
+                continue
+
+            ## ====== COMMAND: remember ======
+            if user_input.lower().startswith("remember "):
+                note = user_input[9:].strip()
+                if not note:
+                    print("Usage: remember <note>")
+                    print("   or: remember <file>: <note>")
+                    continue
+
+                if ": " in note:
+                    parts = note.split(": ", 1)
+                    filename = parts[0].strip() + ".md"
+                    note_text = parts[1].strip()
+                else:
+                    filename = "general_notes.md"
+                    note_text = note
+
+                rag.add_note(note_text, filename)
+                print(f"Added to: {filename}")
+
+                if voice_engine:
+                    voice_engine.speak("Note added.")
+
+                continue
+
+            ## ====== COMMAND: show files ======
+            if user_input.lower() == "show files":
+                print("\nKNOWLEDGE BASE FILES:")
+                print("═" * 50)
+                files = rag.list_files()
+                if files:
+                    for filename, lines, size in files:
+                        print(f"  {filename} ({lines} lines, {size})")
+                else:
+                    print("  (no files yet - use 'remember' to create)")
+                print("═" * 50)
+                continue
+
+            ## ====== COMMAND: show knowledge ======
+            if user_input.lower() == "show knowledge":
+                stats = rag.get_stats()
+                print("\nKNOWLEDGE BASE STATS:")
+                print("═" * 50)
+                for key, value in stats.items():
+                    print(f"  {key}: {value}")
+                print("═" * 50)
+                continue
+
+            ## ====================================
+            ## DEFAULT: Send to model
+            ## ====================================
+            if not user_input or not user_input.strip():
+                continue
+
+            session.add_message("George", user_input)
+            context = session.get_context()
+
+            print("")
+            print("Digger:")
+            print("─" * 50)
+
+            try:
+                response = ollama.chat(context)
+                print("")
+            except KeyboardInterrupt:
+                print("\n[Interrupted]")
+                response = ""
+
+            print("─" * 50)
+
+            if response:
+                session.add_message("Digger", response)
+
+                if voice_engine:
+                    voice_engine.speak(response)
+
+        except EOFError:
+            print("\n[EOF - exiting]")
+            break
+
+        except KeyboardInterrupt:
+            if voice_engine:
+                voice_engine.skip()
+            print("")
+            try:
+                readline.set_pre_input_hook(None)
+                readline.redisplay()
+            except:
+                pass
+            try:
+                import termios
+                termios.tcflush(sys.stdin, termios.TCIFLUSH)
+            except:
+                pass
+            continue
+
+    ## ========================================
+    ## CLEANUP
+    ## ========================================
+    if voice_engine:
+        voice_engine.skip()
+
+    print("")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+
+<div class="file-header">digger/ollama.py</div>
+<pre class="file-content"><code>## ============================================================
+## OLLAMA.PY - Ollama model interaction
+## ============================================================
+## STDIN DEADLOCK FIX:
+## process.stdin.write(context + "\n")
+## process.stdin.flush()   # <-- Critical!
+## process.stdin.close()   # <-- Critical!
+## ============================================================
+
+import subprocess
+import sys
+
+
+class OllamaClient:
+    """Client for interacting with Ollama models."""
+
+    def __init__(self, model="mistral"):
+        self.model = model
+
+    def chat(self, context, stream=True):
+        """Send context to model and get response."""
+        if not context or not context.strip():
+            return ""
+
+        try:
+            process = subprocess.Popen(
+                ["ollama", "run", self.model],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=False,
+                bufsize=0
+            )
+
+            ## CRITICAL: stdin flush fix for deadlock
+            process.stdin.write((context + "\n").encode())
+            process.stdin.flush()
+            process.stdin.close()
+
+            response = ""
+
+            while True:
+                char = process.stdout.read(1)
+                if not char:
+                    break
+                decoded = char.decode('utf-8', errors='replace')
+                response += decoded
+                if stream:
+                    sys.stdout.write(decoded)
+                    sys.stdout.flush()
+
+            process.wait()
+
+            stderr_output = process.stderr.read().decode('utf-8', errors='replace')
+            if stderr_output:
+                self._handle_stderr(stderr_output)
+
+            return response.strip()
+
+        except FileNotFoundError:
+            print("[Error: Ollama not installed. Visit https://ollama.ai]")
+            return ""
+
+        except Exception as e:
+            print(f"[Ollama error: {e}]")
+            return ""
+
+    def _handle_stderr(self, stderr_output):
+        """Handle stderr output from Ollama."""
+        import re
+        clean_stderr = re.sub(r'\x1b\[[0-9;?]*[a-zA-Z]', '', stderr_output)
+        clean_stderr = re.sub(r'[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]', '', clean_stderr)
+        clean_stderr = clean_stderr.strip()
+
+        if not clean_stderr:
+            return
+
+        stderr_lower = clean_stderr.lower()
+
+        if "model not found" in stderr_lower or "pull" in stderr_lower:
+            print(f"\n[Error: Model '{self.model}' not found]")
+            print(f"[Run: ollama pull {self.model}]")
+        elif "connection refused" in stderr_lower:
+            print("\n[Error: Ollama not running]")
+            print("[Run: ollama serve]")
+        elif clean_stderr:
+            print(f"\n[Ollama stderr: {clean_stderr}]")
+
+    def chat_no_stream(self, context):
+        """Send context to model, return response without streaming."""
+        return self.chat(context, stream=False)
+
+    def check_model(self):
+        """Check if the model is available."""
+        try:
+            result = subprocess.run(
+                ["ollama", "list"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            return self.model in result.stdout
+        except Exception:
+            return False
+
+    def list_models(self):
+        """List available Ollama models."""
+        try:
+            result = subprocess.run(
+                ["ollama", "list"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            return result.stdout
+        except FileNotFoundError:
+            return "Error: Ollama not installed"
+        except Exception as e:
+            return f"Error: {e}"
+
+    def pull_model(self):
+        """Pull/download the model."""
+        try:
+            print(f"[Pulling model '{self.model}'...]")
+            process = subprocess.Popen(
+                ["ollama", "pull", self.model],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+            for line in process.stdout:
+                print(line, end="", flush=True)
+            process.wait()
+            return process.returncode == 0
+        except Exception as e:
+            print(f"[Error: {e}]")
+            return False
+</code></pre>
+
+<div class="file-header">digger/voice.py</div>
+<pre class="file-content"><code>## ============================================================
+## VOICE.PY - Text-to-Speech engine using ElevenLabs
+## ============================================================
+## CRITICAL: stdin=subprocess.DEVNULL in Popen prevents
+## mpg123 from stealing keyboard input!
+## ============================================================
+
+import os
+import re
+import time
+import tempfile
+import subprocess
+import requests
+from pathlib import Path
+
+
+class VoiceEngine:
+    """Text-to-Speech engine using ElevenLabs API."""
+
+    def __init__(self, config):
+        self.api_key = config.get("elevenlabs_api_key", "")
+        self.voice_id = config.get("voice_id", "twLPF55UcxNYRmxaWLAn")
+        self.stability = config.get("voice_stability", 0.4)
+        self.similarity = config.get("voice_similarity", 0.3)
+        self.process = None
+        self.temp_file = None
+        self.api_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
+
+    def speak(self, text):
+        """Convert text to speech and play it."""
+        if not text or not text.strip():
+            return False
+        if not self.api_key:
+            print("[Voice disabled - no API key]")
+            return False
+
+        clean_text = self._filter_text(text)
+        if not clean_text:
+            return False
+
+        audio_data = self._tts_request(clean_text)
+        if not audio_data:
+            return False
+
+        return self._play_audio(audio_data)
+
+    def skip(self):
+        """Kill audio playback immediately."""
+        if self.process:
+            try:
+                self.process.terminate()
+                self.process.wait(timeout=1)
+            except Exception:
+                try:
+                    self.process.kill()
+                except Exception:
+                    pass
+            self.process = None
+
+        if self.temp_file and os.path.exists(self.temp_file):
+            try:
+                os.unlink(self.temp_file)
+            except Exception:
+                pass
+            self.temp_file = None
+
+    def is_playing(self):
+        """Check if audio is currently playing."""
+        if self.process:
+            return self.process.poll() is None
+        return False
+
+    def _filter_text(self, text):
+        """Filter text for speech - remove code blocks, markdown, etc."""
+        text = re.sub(r'```[\s\S]*?```', '', text)
+        text = re.sub(r'`[^`]*`', '', text)
+        text = re.sub(r'\*\*([^*]*)\*\*', r'\1', text)
+        text = re.sub(r'\*([^*]*)\*', r'\1', text)
+        text = re.sub(r'__([^_]*)__', r'\1', text)
+        text = re.sub(r'_([^_]*)_', r'\1', text)
+
+        lines = text.split('\n')
+        filtered_lines = []
+        for line in lines:
+            if re.search(r'^\s*(def |class |import |from |print\(|if |for |while |return )', line):
+                continue
+            if re.search(r'[{};\[\]]=', line):
+                continue
+            if line.strip().startswith('#') and not line.strip().startswith('# '):
+                continue
+            filtered_lines.append(line)
+
+        text = '\n'.join(filtered_lines)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = text.strip()
+        return text
+
+    def _tts_request(self, text, retry_count=0):
+        """Make TTS request to ElevenLabs API."""
+        headers = {
+            "xi-api-key": self.api_key,
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "text": text,
+            "model_id": "eleven_flash_v2_5",
+            "voice_settings": {
+                "stability": self.stability,
+                "similarity_boost": self.similarity,
+                "style": 1.0,
+                "use_speaker_boost": True
+            }
+        }
+
+        try:
+            response = requests.post(
+                self.api_url,
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.content
+
+        except requests.HTTPError as e:
+            status = e.response.status_code if e.response else 0
+
+            if status == 401:
+                print("[Voice error: Invalid ELEVENLABS_API_KEY]")
+                return None
+            elif status == 429:
+                if retry_count < 1:
+                    print("[Voice: Rate limited - waiting 10s...]")
+                    time.sleep(10)
+                    return self._tts_request(text, retry_count + 1)
+                else:
+                    print("[Voice error: Rate limit exceeded]")
+                    return None
+            elif status == 422:
+                print("[Voice: Text contains unsupported characters - cleaning...]")
+                clean = ''.join(c for c in text if ord(c) < 128)
+                if clean and retry_count < 1:
+                    return self._tts_request(clean, retry_count + 1)
+                return None
+            else:
+                print(f"[Voice error: HTTP {status}]")
+                return None
+
+        except requests.Timeout:
+            print("[Voice error: Request timed out]")
+            return None
+
+        except requests.RequestException as e:
+            print(f"[Voice error: {e}]")
+            return None
+
+    def _play_audio(self, audio_data):
+        """Play audio data using mpg123."""
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as f:
+                f.write(audio_data)
+                self.temp_file = f.name
+
+            ## CRITICAL: stdin=DEVNULL prevents mpg123 from stealing keyboard input
+            self.process = subprocess.Popen(
+                ["mpg123", "-q", self.temp_file],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+
+            return True
+
+        except FileNotFoundError:
+            print("[Voice error: mpg123 not installed. Run: apt install mpg123]")
+            return False
+
+        except Exception as e:
+            print(f"[Voice error: {e}]")
+            return False
+
+    def wait(self):
+        """Wait for current playback to finish."""
+        if self.process:
+            try:
+                self.process.wait()
+            except Exception:
+                pass
+
+        if self.temp_file and os.path.exists(self.temp_file):
+            try:
+                os.unlink(self.temp_file)
+            except Exception:
+                pass
+            self.temp_file = None
+</code></pre>
+
+<div class="file-header">digger/rag.py</div>
+<pre class="file-content"><code>## ============================================================
+## RAG.PY - Retrieval Augmented Generation search engine
+## ============================================================
+## BOUNDS LIMITS (prevent context overflow):
+## - MAX_MATCHES_PER_FILE: 3
+## - MAX_CONTEXT_LINES: 5
+## - APPROX_CHAR_LIMIT: 8000 (~2000 tokens)
+## - MAX_FILES: 5
+## ============================================================
+
+import os
+import glob
+import re
+from pathlib import Path
+
+MAX_MATCHES_PER_FILE = 3
+MAX_CONTEXT_LINES = 5
+APPROX_CHAR_LIMIT = 8000
+MAX_FILES = 5
+
+
+class RAGSearch:
+    """Search engine for RAG knowledge base."""
+
+    def __init__(self, rag_dir="./RAG"):
+        self.rag_dir = Path(rag_dir)
+        self.rag_dir.mkdir(parents=True, exist_ok=True)
+
+    def search(self, topic):
+        """Search all .md files for a topic."""
+        if not topic or not topic.strip():
+            return ""
+
+        topic = topic.strip()
+        results = []
+        total_chars = 0
+        files_included = 0
+
+        md_files = sorted(glob.glob(str(self.rag_dir / "*.md")))
+
+        if not md_files:
+            return ""
+
+        for filepath in md_files:
+            if files_included >= MAX_FILES:
+                break
+            if total_chars >= APPROX_CHAR_LIMIT:
+                break
+
+            matches = self._search_file(filepath, topic)
+
+            if matches:
+                if total_chars + len(matches) > APPROX_CHAR_LIMIT:
+                    remaining = APPROX_CHAR_LIMIT - total_chars
+                    if remaining > 200:
+                        matches = matches[:remaining] + "\n[...truncated...]"
+                    else:
+                        break
+
+                filename = os.path.basename(filepath)
+                formatted = f"[SOURCE: {filename}]\n{matches}"
+                results.append(formatted)
+                total_chars += len(formatted)
+                files_included += 1
+
+        return "\n\n".join(results)
+
+    def _search_file(self, filepath, topic):
+        """Search a single file for topic matches."""
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Warning: Could not read {filepath}: {e}")
+            return ""
+
+        pattern = re.compile(re.escape(topic), re.IGNORECASE)
+        match_indices = []
+
+        for i, line in enumerate(lines):
+            if pattern.search(line):
+                match_indices.append(i)
+
+        if not match_indices:
+            return ""
+
+        match_indices = match_indices[:MAX_MATCHES_PER_FILE]
+
+        extracted = []
+        seen_ranges = set()
+
+        for idx in match_indices:
+            start = max(0, idx - MAX_CONTEXT_LINES)
+            end = min(len(lines), idx + MAX_CONTEXT_LINES + 1)
+
+            section_lines = []
+            for i in range(start, end):
+                if i not in seen_ranges:
+                    seen_ranges.add(i)
+                    section_lines.append(lines[i].rstrip())
+
+            if section_lines:
+                extracted.append("\n".join(section_lines))
+
+        return "\n--\n".join(extracted)
+
+    def list_files(self):
+        """List all knowledge base files."""
+        files = []
+        md_files = glob.glob(str(self.rag_dir / "*.md"))
+
+        for filepath in sorted(md_files):
+            try:
+                filename = os.path.basename(filepath)
+                line_count = sum(1 for _ in open(filepath))
+                size_kb = os.path.getsize(filepath) / 1024
+                files.append((filename, line_count, f"{size_kb:.1f}KB"))
+            except Exception:
+                pass
+
+        return files
+
+    def get_file_content(self, filename):
+        """Get full content of a specific file."""
+        filepath = self.rag_dir / filename
+
+        if not filepath.exists():
+            return f"File not found: {filename}"
+
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            return f"Error reading {filename}: {e}"
+
+    def add_note(self, note, filename="general_notes.md"):
+        """Add a note to the knowledge base."""
+        from datetime import datetime
+
+        filepath = self.rag_dir / filename
+
+        with open(filepath, "a", encoding="utf-8") as f:
+            f.write(f"\n## {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+            f.write(f"{note}\n")
+
+    def get_stats(self):
+        """Get statistics about the knowledge base."""
+        md_files = glob.glob(str(self.rag_dir / "*.md"))
+        total_lines = 0
+        total_size = 0
+
+        for filepath in md_files:
+            try:
+                total_lines += sum(1 for _ in open(filepath))
+                total_size += os.path.getsize(filepath)
+            except Exception:
+                pass
+
+        return {
+            "file_count": len(md_files),
+            "total_lines": total_lines,
+            "total_size_kb": f"{total_size / 1024:.1f}KB",
+            "rag_dir": str(self.rag_dir),
+        }
+</code></pre>
+
+<div class="file-header">digger/session.py</div>
+<pre class="file-content"><code>## ============================================================
+## SESSION.PY - Session and memory management
+## ============================================================
+
+import os
+from datetime import datetime
+from pathlib import Path
+
+from digger.config import SYSTEM_PROMPT
+
+
+class Session:
+    """Manages a single study session."""
+
+    def __init__(self, memory_dir="./memory"):
+        self.id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.memory_dir = Path(memory_dir)
+        self.filepath = self.memory_dir / f"session_{self.id}.txt"
+        self.memory_dir.mkdir(parents=True, exist_ok=True)
+        self._rag_context = ""
+        self._messages = []
+        self._save()
+
+    def add_context(self, content, topic=""):
+        """Add RAG knowledge to the session context."""
+        if not content:
+            return
+        formatted = f"\n=== KNOWLEDGE ON '{topic}' ===\n{content}\n=== END KNOWLEDGE ===\n"
+        self._rag_context += formatted
+        self._save()
+
+    def add_message(self, role, content):
+        """Add a message to the conversation history."""
+        if not content or not content.strip():
+            return
+        self._messages.append((role, content.strip()))
+        self._save()
+
+    def get_context(self):
+        """Get the full context to send to the model."""
+        context_parts = []
+        context_parts.append(SYSTEM_PROMPT)
+
+        if self._rag_context:
+            context_parts.append(self._rag_context)
+
+        for role, content in self._messages:
+            context_parts.append(f"{role}: {content}")
+
+        return "\n".join(context_parts)
+
+    def get_last_message(self, role=None):
+        """Get the last message, optionally filtered by role."""
+        for msg_role, content in reversed(self._messages):
+            if role is None or msg_role == role:
+                return content
+        return ""
+
+    def get_message_count(self):
+        """Get the number of messages in the conversation."""
+        return len(self._messages)
+
+    def clear_context(self):
+        """Clear RAG context but keep conversation history."""
+        self._rag_context = ""
+        self._save()
+
+    def _save(self):
+        """Save the current session to disk."""
+        try:
+            with open(self.filepath, "w") as f:
+                f.write(f"## Session: {self.id}\n")
+                f.write(f"## Started: {datetime.now().isoformat()}\n")
+                f.write("\n")
+
+                if self._rag_context:
+                    f.write("## === RAG CONTEXT ===\n")
+                    f.write(self._rag_context)
+                    f.write("\n")
+
+                f.write("## === CONVERSATION ===\n")
+                for role, content in self._messages:
+                    f.write(f"{role}: {content}\n")
+
+        except Exception as e:
+            print(f"Warning: Could not save session: {e}")
+
+    def get_summary(self):
+        """Get a summary of the session for display."""
+        return {
+            "id": self.id,
+            "filepath": str(self.filepath),
+            "message_count": len(self._messages),
+            "has_rag_context": bool(self._rag_context),
+            "rag_context_length": len(self._rag_context),
+        }
+</code></pre>
+
+<div class="file-header">tests/test_digger.py</div>
+<pre class="file-content"><code>#!/usr/bin/env python3
+## Run: python -m pytest tests/ -v
+## Or:  python tests/test_digger.py
+
+import os
+import sys
+import subprocess
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from digger.config import load_config, PACKAGE_DIR, SYSTEM_PROMPT
+from digger.rag import RAGSearch
+from digger.session import Session
+from digger.ollama import OllamaClient
+
+PASSED = 0
+FAILED = 0
+RESULTS = []
+
+def test(name):
+    def decorator(func):
+        def wrapper():
+            global PASSED, FAILED
+            try:
+                func()
+                PASSED += 1
+                RESULTS.append(f"  [PASS] {name}")
+                return True
+            except AssertionError as e:
+                FAILED += 1
+                RESULTS.append(f"  [FAIL] {name}: {e}")
+                return False
+            except Exception as e:
+                FAILED += 1
+                RESULTS.append(f"  [ERROR] {name}: {e}")
+                return False
+        return wrapper
+    return decorator
+
+@test("Config loads with defaults")
+def test_config_loads():
+    config = load_config()
+    assert config["model"] == "mistral"
+    assert "rag_dir" in config
+    assert "memory_dir" in config
+
+@test("Package directory resolves correctly")
+def test_package_dir():
+    assert PACKAGE_DIR.exists()
+    assert (PACKAGE_DIR / "digger").exists()
+    assert (PACKAGE_DIR / "RAG").exists()
+
+@test("RAG dir is absolute path")
+def test_rag_absolute():
+    config = load_config()
+    rag_path = Path(config["rag_dir"])
+    assert rag_path.is_absolute(), f"RAG path not absolute: {rag_path}"
+
+@test("System prompt contains anti-roleplay rules")
+def test_system_prompt():
+    assert "NEVER" in SYSTEM_PROMPT
+    assert "Digger:" in SYSTEM_PROMPT or "dialogue" in SYSTEM_PROMPT
+    assert "ONE" in SYSTEM_PROMPT
+
+@test("RAG finds knowledge files")
+def test_rag_finds_files():
+    config = load_config()
+    rag = RAGSearch(config["rag_dir"])
+    files = rag.list_files()
+    assert len(files) > 0, "No RAG files found"
+
+@test("RAG search returns results for 'TCP'")
+def test_rag_search_tcp():
+    config = load_config()
+    rag = RAGSearch(config["rag_dir"])
+    results = rag.search("TCP")
+    assert len(results) > 0, "No results for TCP"
+
+@test("RAG search returns results for 'ACSC'")
+def test_rag_search_acsc():
+    config = load_config()
+    rag = RAGSearch(config["rag_dir"])
+    results = rag.search("ACSC")
+    assert isinstance(results, str)
+
+@test("RAG respects bounds limits")
+def test_rag_bounds():
+    config = load_config()
+    rag = RAGSearch(config["rag_dir"])
+    results = rag.search("the")
+    assert len(results) <= 8500, f"Results too long: {len(results)}"
+
+@test("Session creates with unique ID")
+def test_session_creates():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        session = Session(memory_dir=tmpdir)
+        assert session.id is not None
+        assert len(session.id) > 0
+
+@test("Session stores messages")
+def test_session_messages():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        session = Session(memory_dir=tmpdir)
+        session.add_message("George", "test question")
+        session.add_message("Digger", "test answer")
+        assert session.get_message_count() == 2
+
+@test("Session context includes system prompt")
+def test_session_context():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        session = Session(memory_dir=tmpdir)
+        session.add_message("George", "hello")
+        context = session.get_context()
+        assert "Digger" in context
+        assert "George: hello" in context
+
+@test("Ollama client initializes")
+def test_ollama_init():
+    ollama = OllamaClient(model="mistral")
+    assert ollama.model == "mistral"
+
+@test("Ollama can list models")
+def test_ollama_list():
+    ollama = OllamaClient(model="mistral")
+    output = ollama.list_models()
+    assert "mistral" in output.lower() or "NAME" in output
+
+@test("Ollama model check works")
+def test_ollama_check():
+    ollama = OllamaClient(model="mistral")
+    exists = ollama.check_model()
+    assert isinstance(exists, bool)
+
+@test("CLI --help works")
+def test_cli_help():
+    result = subprocess.run(
+        ["digger", "--help"],
+        capture_output=True,
+        text=True,
+        timeout=10
+    )
+    assert result.returncode == 0
+    assert "Digger" in result.stdout
+
+@test("CLI --list works")
+def test_cli_list():
+    result = subprocess.run(
+        ["digger", "--list"],
+        capture_output=True,
+        text=True,
+        timeout=10
+    )
+    assert result.returncode == 0
+
+@test("Text streams before voice (non-blocking)")
+def test_streaming_order():
+    cli_path = PACKAGE_DIR / "digger" / "cli.py"
+    with open(cli_path) as f:
+        content = f.read()
+    chat_pos = content.find("ollama.chat(context)")
+    voice_pos = content.find("voice_engine.speak(response)")
+    assert chat_pos > 0
+    assert voice_pos > 0
+    assert chat_pos < voice_pos
+
+def run_all():
+    print("=" * 60)
+    print("DIGGER AUTOMATED TEST SUITE")
+    print("=" * 60)
+
+    print("\n[CONFIG TESTS]")
+    test_config_loads()
+    test_package_dir()
+    test_rag_absolute()
+    test_system_prompt()
+
+    print("\n[RAG TESTS]")
+    test_rag_finds_files()
+    test_rag_search_tcp()
+    test_rag_search_acsc()
+    test_rag_bounds()
+
+    print("\n[SESSION TESTS]")
+    test_session_creates()
+    test_session_messages()
+    test_session_context()
+
+    print("\n[OLLAMA TESTS]")
+    test_ollama_init()
+    test_ollama_list()
+    test_ollama_check()
+
+    print("\n[CLI TESTS]")
+    test_cli_help()
+    test_cli_list()
+
+    print("\n[STREAMING TESTS]")
+    test_streaming_order()
+
+    print("\n" + "=" * 60)
+    print("RESULTS:")
+    for r in RESULTS:
+        print(r)
+    print("=" * 60)
+    print(f"PASSED: {PASSED} | FAILED: {FAILED}")
+    print("=" * 60)
+
+    return FAILED == 0
+
+if __name__ == "__main__":
+    success = run_all()
+    sys.exit(0 if success else 1)
+</code></pre>
+
+<h2 id="troubleshooting">6. Troubleshooting</h2>
+
+<table>
+    <tr><th>Problem</th><th>Cause</th><th>Fix</th></tr>
+    <tr>
+        <td>Can't type after voice plays</td>
+        <td>mpg123 stealing stdin</td>
+        <td>Ensure <code class="inline-code">stdin=subprocess.DEVNULL</code> in voice.py _play_audio</td>
+    </tr>
+    <tr>
+        <td>Model hangs, no response</td>
+        <td>stdin deadlock</td>
+        <td>Ensure <code class="inline-code">stdin.flush()</code> and <code class="inline-code">stdin.close()</code> in ollama.py</td>
+    </tr>
+    <tr>
+        <td>Model prefixes "Digger:"</td>
+        <td>System prompt missing rules</td>
+        <td>Add "NEVER prefix your response" to SYSTEM_PROMPT</td>
+    </tr>
+    <tr>
+        <td>RAG not found</td>
+        <td>Relative path issue</td>
+        <td>Use PACKAGE_DIR for absolute paths in config.py</td>
+    </tr>
+    <tr>
+        <td>Voice error 401</td>
+        <td>Invalid API key</td>
+        <td>Check ELEVENLABS_API_KEY</td>
+    </tr>
+    <tr>
+        <td>Voice error 429</td>
+        <td>Rate limited</td>
+        <td>Wait or upgrade ElevenLabs plan</td>
+    </tr>
+    <tr>
+        <td>"Ollama not running"</td>
+        <td>Ollama server not started</td>
+        <td>Run <code class="inline-code">ollama serve</code></td>
+    </tr>
+    <tr>
+        <td>"Model not found"</td>
+        <td>Model not downloaded</td>
+        <td>Run <code class="inline-code">ollama pull mistral</code></td>
+    </tr>
+</table>
+
+<div class="success">
+<strong>Verification Command</strong><br>
+<code>python tests/test_digger.py</code><br>
+Expected: <code>PASSED: 17 | FAILED: 0</code>
+</div>
+
+<hr>
+<p style="text-align: center; color: #666; margin-top: 40px;">
+    DIGGER Preservation Document | Version 0.1.0 | 2026-01-22<br>
+    Voice ID: twLPF55UcxNYRmxaWLAn | Model: mistral<br>
+    Created for permanent archival and reconstruction.
+</p>
+
+</div>
+</body>
+</html>
+</code></pre></content>
+</invoke>

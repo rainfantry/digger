@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+digger/__init__.py
+digger/cli.py
+digger/config.py
+digger/ollama.py
+digger/rag.py
+digger/session.py
+digger/voice.py
+digger.egg-info/PKG-INFO
+digger.egg-info/SOURCES.txt
+digger.egg-info/dependency_links.txt
+digger.egg-info/entry_points.txt
+digger.egg-info/requires.txt
+digger.egg-info/top_level.txt
+tests/test_digger.py

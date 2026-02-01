@@ -1,0 +1,26 @@
+## ============================================================
+## DEFAULT.YAML - Default configuration template
+## ============================================================
+## Copy this to ~/.config/digger/config.yaml and customize
+## ============================================================
+
+## ElevenLabs API key (get from elevenlabs.io)
+## Can also set via ELEVENLABS_API_KEY environment variable
+elevenlabs_api_key: ""
+
+## Voice ID for TTS (from ElevenLabs voice library)
+voice_id: "twLPF55UcxNYRmxaWLAn"
+
+## Default Ollama model
+model: "mistral"
+
+## RAG knowledge base directory (relative or absolute)
+rag_dir: "./RAG"
+
+## Session memory directory
+memory_dir: "./memory"
+
+## Voice settings
+voice_enabled: true
+voice_stability: 0.4
+voice_similarity: 0.3

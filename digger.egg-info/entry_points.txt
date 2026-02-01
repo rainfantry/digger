@@ -1,0 +1,2 @@
+[console_scripts]
+digger = digger.cli:main
