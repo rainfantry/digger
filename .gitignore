@@ -1,0 +1,27 @@
+# secrets
+.env
+*.env
+config/local.yaml
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# audio
+*.mp3
+*.wav
+
+# memory/sessions
+memory/
+*.session
+
+# ide
+.vscode/
+.idea/
+
+# system
+.DS_Store
+Thumbs.db
